@@ -11,7 +11,7 @@ public class MyLogger {
 
 	private final static boolean sIsLoggerEnable = true;
 	private static boolean logFlag = true;
-	private final static String tag = "YHYY";
+	private final static String tag = "Lixiao";
 
 	public static int logLevel = Log.VERBOSE;
 

@@ -59,7 +59,6 @@ public class EhaiGsonArrayRequest<T> extends Request<T> {
 		url = url;
 		clazz = rep;
 		parmas = par;
-		logger.d(parmas);
 	}
 	@Override
 	protected Response<T> parseNetworkResponse(NetworkResponse response) {

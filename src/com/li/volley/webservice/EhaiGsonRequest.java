@@ -57,7 +57,6 @@ public class EhaiGsonRequest<T> extends Request<T> {
 		super(method, url, errorListener);
 		this.listener = listener;
 		this.paramsString = param;
-		logger.d(paramsString);
 		url = url;
 		resultClass = responseClass;
 	}

@@ -2,6 +2,7 @@ package com.li.volley.webservice;
 
 import java.util.Map;
 
+import android.R;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -17,6 +18,7 @@ import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
+import com.li.volley.response.UrlRequest;
 import com.li.volley.utils.MyLogger;
 
 /**
@@ -78,30 +80,29 @@ public class EhaiVolleyFactory {
 	/**
 	 * 数据中有对象的其他请求方法
 	 * 
-	 * @param type
-	 *            请求方法type
-	 * @param Httptype
-	 *            http请求方式 EhaiVolleyFactory.HTTP_POST
-	 * @param params
-	 *            接口請求參數
+	 * @param request
+	 *            请求对象
 	 * @param listener
 	 *            数据返回的回调监听
 	 * @param responseClass
 	 *            返回数据的对象
 	 * */
-	public <T> void EhaiSendJsonRequstDiolag(Context context, final int type,
-			int Httptype, String params,
-			final EhaiResponseListener<T> listener, Class responseClass) {
+	public <T> void EhaiSendJsonRequstDiolag(Context context,
+			final UrlRequest request, final EhaiResponseListener<T> listener,
+			Class responseClass) {
 		progressDialog = getDialog(context);
-		EhaiGsonRequest<T> ehaiGsonRequest = new EhaiGsonRequest<T>(Httptype,
-				getResponseUrl(type), params, new Listener<T>() {
+		logger.d(request.toString());
+		EhaiGsonRequest<T> ehaiGsonRequest = new EhaiGsonRequest<T>(
+				request.getHttpType(), request.getUrl(), request.getParams(),
+				new Listener<T>() {
 
 					@Override
 					public void onResponse(T response) {
 						if (progressDialog != null) {
 							progressDialog.dismiss();
 						}
-						listener.onEhaiResponse(type, response);
+						listener.onEhaiResponse(request.getRequestType(),
+								response);
 					}
 				}, errorListener, responseClass) {
 		};
@@ -112,40 +113,33 @@ public class EhaiVolleyFactory {
 			e.printStackTrace();
 		}
 		ehaiGsonRequest.setTag(Tag);
-		logger.d(ehaiGsonRequest.getRetryPolicy().getCurrentTimeout());
 		queue.add(ehaiGsonRequest);
-		queue.start();
-		logger.d(System.currentTimeMillis());
-		// queue.add(new ClearCacheRequest((Cache)
-		// ehaiGsonRequest.getCacheEntry(), null));
 	}
 
 	/**
 	 * 数据中有对象的其他请求方法
 	 * 
-	 * @param type
-	 *            请求方法type
-	 * @param Httptype
-	 *            http请求方式 EhaiVolleyFactory.HTTP_POST
-	 * @param params
-	 *            接口請求參數
+	 * @param request
+	 *            请求对象
 	 * @param listener
 	 *            数据返回的回调监听
 	 * @param responseClass
 	 *            返回数据的对象
 	 * */
-	public <T> void EhaiSendJsonRequstNo(final int type, int Httptype,
-			String params, final EhaiResponseListener<T> listener,
-			Class responseClass) {
-		EhaiGsonRequest<T> ehaiGsonRequest = new EhaiGsonRequest<T>(Httptype,
-				getResponseUrl(type), params, new Listener<T>() {
+	public <T> void EhaiSendJsonRequstNo(final UrlRequest request,
+			final EhaiResponseListener<T> listener, Class responseClass) {
+		logger.d(request.toString());
+		EhaiGsonRequest<T> ehaiGsonRequest = new EhaiGsonRequest<T>(
+				request.getHttpType(), request.getUrl(), request.getParams(),
+				new Listener<T>() {
 
 					@Override
 					public void onResponse(T response) {
 						if (progressDialog != null) {
 							progressDialog.dismiss();
 						}
-						listener.onEhaiResponse(type, response);
+						listener.onEhaiResponse(request.getRequestType(),
+								response);
 					}
 				}, errorListener, responseClass) {
 		};
@@ -154,16 +148,19 @@ public class EhaiVolleyFactory {
 
 	}
 
-	public void EhaiSendStringRequstDiolag(Context context, final int type,
-			int Httptype, String params,
+	public void EhaiSendStringRequstDiolag(Context context,
+			final UrlRequest request,
 			final EhaiResponseListener<String> listener) {
+		logger.d(request.toString());
 		progressDialog = getDialog(context);
-		EhaiStringRequest ehaiStringRequest = new EhaiStringRequest(Httptype,
-				getResponseUrl(type), params, new Listener<String>() {
+		EhaiStringRequest ehaiStringRequest = new EhaiStringRequest(
+				request.getHttpType(), request.getUrl(), request.getParams(),
+				new Listener<String>() {
 
 					@Override
 					public void onResponse(String response) {
-						listener.onEhaiResponse(type, response);
+						listener.onEhaiResponse(request.getRequestType(),
+								response);
 					}
 				}, errorListener);
 		ehaiStringRequest.setTag(Tag);
@@ -171,14 +168,17 @@ public class EhaiVolleyFactory {
 
 	}
 
-	public void EhaiSendStringRequstNo(final int type, int Httptype,
-			String params, final EhaiResponseListener<String> listener) {
-		EhaiStringRequest ehaiStringRequest = new EhaiStringRequest(Httptype,
-				getResponseUrl(type), params, new Listener<String>() {
+	public void EhaiSendStringRequstNo(final UrlRequest request,
+			final EhaiResponseListener<String> listener) {
+		logger.d(request.toString());
+		EhaiStringRequest ehaiStringRequest = new EhaiStringRequest(
+				request.getHttpType(), request.getUrl(), request.getParams(),
+				new Listener<String>() {
 
 					@Override
 					public void onResponse(String response) {
-						listener.onEhaiResponse(type, response);
+						listener.onEhaiResponse(request.getRequestType(),
+								response);
 					}
 				}, errorListener);
 		ehaiStringRequest.setTag(Tag);
@@ -188,30 +188,27 @@ public class EhaiVolleyFactory {
 	/**
 	 * 数据中是数组的其他请求方法
 	 * 
-	 * @param type
-	 *            请求方法type
-	 * @param Httptype
-	 *            http请求方式 EhaiVolleyFactory.HTTP_POST
-	 * @param params
-	 *            接口請求參數
+	 * @param request
+	 *            请求对象
 	 * @param listener
 	 *            数据返回的回调监听
 	 * @param responseClass
 	 *            返回数据的对象
 	 * */
-	public <T> void EhaiSendJsonArrayRequstNo( final int type,
-			int Httptype, String params,
+	public <T> void EhaiSendJsonArrayRequstNo(final UrlRequest request,
 			final EhaiResponseListener<T> listener, Class responseClass) {
-
+		logger.d(request.toString());
 		EhaiGsonArrayRequest<T> ehaiGsonArrayRequest = new EhaiGsonArrayRequest<T>(
-				Httptype, getResponseUrl(type), params, new Listener<T>() {
+				request.getHttpType(), request.getUrl(), request.getParams(),
+				new Listener<T>() {
 
 					@Override
 					public void onResponse(T response) {
 						if (progressDialog != null) {
 							progressDialog.dismiss();
 						}
-						listener.onEhaiResponse(type, response);
+						listener.onEhaiResponse(request.getRequestType(),
+								response);
 
 					}
 				}, errorListener, responseClass);
@@ -222,95 +219,29 @@ public class EhaiVolleyFactory {
 	/**
 	 * 数据中有对象数组的其他请求方法
 	 * 
-	 * @param type
-	 *            请求方法type
-	 * @param Httptype
-	 *            http请求方式 EhaiVolleyFactory.HTTP_POST
-	 * @param params
-	 *            接口請求參數
+	 * @param request
+	 *            请求对象
 	 * @param listener
 	 *            数据返回的回调监听
 	 * @param responseClass
 	 *            返回数据的对象
 	 * */
-	public <T> void EhaiSendJsonArrayRequstDiolag(final int type, int Httptype,
-			String params, final EhaiResponseListener<T> listener,
-			Class responseClass) {
+	public <T> void EhaiSendJsonArrayRequstDiolag(final UrlRequest request,
+			final EhaiResponseListener<T> listener, Class responseClass) {
+		logger.d(request.toString());
 		EhaiGsonArrayRequest<T> ehaiGsonArrayRequest = new EhaiGsonArrayRequest<T>(
-				Httptype, getResponseUrl(type), params, new Listener<T>() {
+				request.getHttpType(), request.getUrl(), request.getParams(),
+				new Listener<T>() {
 
 					@Override
 					public void onResponse(T response) {
-						listener.onEhaiResponse(type, response);
+						listener.onEhaiResponse(request.getRequestType(),
+								response);
 
 					}
 				}, errorListener, responseClass);
 		ehaiGsonArrayRequest.setTag(Tag);
 		queue.add(ehaiGsonArrayRequest);
-	}
-
-	/**
-	 * 数据中有对象的GeET请求方法
-	 * 
-	 * @param type
-	 *            请求方法type
-	 * @param listener
-	 *            数据返回的回调监听
-	 * @param responseClass
-	 *            返回数据的对象
-	 * */
-	public <T> void EhaiSendJsonRequstNo(final int type,
-			final EhaiResponseListener<T> listener, Class responseClass) {
-		this.EhaiSendJsonRequstNo(type, Method.GET, null, listener,
-				responseClass);
-	}
-
-	/**
-	 * 数据中有数组的GET请求方法
-	 * 
-	 * @param type
-	 *            请求方法type
-	 * @param listener
-	 *            数据返回的回调监听
-	 * @param responseClass
-	 *            返回数据的对象
-	 * */
-	public <T> void EhaiSendJsonRequstDiolag(Context context, final int type,
-			final EhaiResponseListener<T> listener, Class responseClass) {
-		this.EhaiSendJsonRequstDiolag(context, type, Method.GET, null,
-				listener, responseClass);
-	}
-
-	/**
-	 * 数据中有数组的GET请求方法
-	 * 
-	 * @param type
-	 *            请求方法type
-	 * @param listener
-	 *            数据返回的回调监听
-	 * @param responseClass
-	 *            返回数组数据的对象
-	 * ***/
-	public <T> void EhaiSendJsonArrayRequstNo(final int type,
-			final EhaiResponseListener<T> listener, Class responseClass) {
-		this.EhaiSendJsonArrayRequstNo(type, Method.GET, null, listener,
-				responseClass);
-	}
-
-	/**
-	 * 数据中有数组的GET请求方法
-	 * 
-	 * @param type
-	 *            请求方法type
-	 * @param listener
-	 *            数据返回的回调监听
-	 * @param responseClass
-	 *            返回数组数据的对象
-	 * ***/
-	public <T> void EhaiSendJsonArrayRequstDiolag(final int type,
-			final EhaiResponseListener<T> listener, Class responseClass) {
-		this.EhaiSendJsonArrayRequstDiolag(type, Method.GET, null, listener,
-				responseClass);
 	}
 
 	public void canalReq(Object tag) {
@@ -345,8 +276,11 @@ public class EhaiVolleyFactory {
 	private Dialog getDialog(Context context) {
 		Dialog dialog = null;
 		try {
-//			dialog = DialogUtil.progressDialog(context);
-			dialog = new ProgressDialog(context);
+			// dialog = DialogUtil.progressDialog(context);
+			dialog = new ProgressDialog(context,
+					R.style.Theme_DeviceDefault_Dialog);
+			dialog.setCanceledOnTouchOutside(false);
+			dialog.show();
 		} catch (Exception e) {
 			if (progressDialog != null)
 				progressDialog.dismiss();
