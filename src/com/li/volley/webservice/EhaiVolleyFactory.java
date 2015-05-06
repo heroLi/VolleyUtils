@@ -18,8 +18,12 @@ import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
+import com.li.volley.response.EhaiJsonArrayResponse;
+import com.li.volley.response.EhaiJsonResponse;
 import com.li.volley.response.UrlRequest;
 import com.li.volley.utils.MyLogger;
+import com.li.volley.utils.NetUtils;
+import com.li.volley.utils.ToastUtils;
 
 /**
  * 一嗨网络请求工具类
@@ -29,6 +33,7 @@ import com.li.volley.utils.MyLogger;
 public class EhaiVolleyFactory {
 
 	private EhaiVolleyFactory(Context context) {
+		mContext = context;
 		queue = Volley.newRequestQueue(context);
 	};
 
@@ -55,6 +60,8 @@ public class EhaiVolleyFactory {
 	public static String md5Key = "MD-ANDROID121953";
 
 	private String Tag = "Ehai";
+	
+	private Context mContext;
 
 	private MyLogger logger = MyLogger.getLogger(getClass().getSimpleName());
 
@@ -62,7 +69,12 @@ public class EhaiVolleyFactory {
 
 	public static EhaiVolleyFactory getVolleyFactory(Context context) {
 		if (ehaiVolleyFactory == null) {
-			ehaiVolleyFactory = new EhaiVolleyFactory(context);
+			synchronized (EhaiVolleyFactory.class) {
+				if(ehaiVolleyFactory == null){
+					
+					ehaiVolleyFactory = new EhaiVolleyFactory(context);
+				}
+			}
 		}
 		return ehaiVolleyFactory;
 	}
@@ -83,13 +95,17 @@ public class EhaiVolleyFactory {
 	 * @param request
 	 *            请求对象
 	 * @param listener
-	 *            数据返回的回调监听
+	 *            数据返回的回调监听   T  EhaiJsonResponse<responseClass>
 	 * @param responseClass
 	 *            返回数据的对象
 	 * */
 	public <T> void EhaiSendJsonRequstDiolag(Context context,
 			final UrlRequest request, final EhaiResponseListener<T> listener,
 			Class responseClass) {
+		if(!checkNetWork()){
+			return ;
+		}
+		
 		progressDialog = getDialog(context);
 		logger.d(request.toString());
 		EhaiGsonRequest<T> ehaiGsonRequest = new EhaiGsonRequest<T>(
@@ -106,12 +122,6 @@ public class EhaiVolleyFactory {
 					}
 				}, errorListener, responseClass) {
 		};
-		try {
-			Map<String, String> heard = ehaiGsonRequest.getHeaders();
-		} catch (AuthFailureError e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		ehaiGsonRequest.setTag(Tag);
 		queue.add(ehaiGsonRequest);
 	}
@@ -122,12 +132,15 @@ public class EhaiVolleyFactory {
 	 * @param request
 	 *            请求对象
 	 * @param listener
-	 *            数据返回的回调监听
+	 *            数据返回的回调监听  T  EhaiJsonResponse<responseClass>
 	 * @param responseClass
 	 *            返回数据的对象
 	 * */
 	public <T> void EhaiSendJsonRequstNo(final UrlRequest request,
 			final EhaiResponseListener<T> listener, Class responseClass) {
+		if(!checkNetWork()){
+			return ;
+		}
 		logger.d(request.toString());
 		EhaiGsonRequest<T> ehaiGsonRequest = new EhaiGsonRequest<T>(
 				request.getHttpType(), request.getUrl(), request.getParams(),
@@ -151,6 +164,9 @@ public class EhaiVolleyFactory {
 	public void EhaiSendStringRequstDiolag(Context context,
 			final UrlRequest request,
 			final EhaiResponseListener<String> listener) {
+		if(!checkNetWork()){
+			return ;
+		}
 		logger.d(request.toString());
 		progressDialog = getDialog(context);
 		EhaiStringRequest ehaiStringRequest = new EhaiStringRequest(
@@ -170,6 +186,9 @@ public class EhaiVolleyFactory {
 
 	public void EhaiSendStringRequstNo(final UrlRequest request,
 			final EhaiResponseListener<String> listener) {
+		if(!checkNetWork()){
+			return ;
+		}
 		logger.d(request.toString());
 		EhaiStringRequest ehaiStringRequest = new EhaiStringRequest(
 				request.getHttpType(), request.getUrl(), request.getParams(),
@@ -191,12 +210,15 @@ public class EhaiVolleyFactory {
 	 * @param request
 	 *            请求对象
 	 * @param listener
-	 *            数据返回的回调监听
+	 *            数据返回的回调监听  T  EhaiJsonArrayResponse<responseClass>
 	 * @param responseClass
 	 *            返回数据的对象
 	 * */
 	public <T> void EhaiSendJsonArrayRequstNo(final UrlRequest request,
 			final EhaiResponseListener<T> listener, Class responseClass) {
+		if(!checkNetWork()){
+			return ;
+		}
 		logger.d(request.toString());
 		EhaiGsonArrayRequest<T> ehaiGsonArrayRequest = new EhaiGsonArrayRequest<T>(
 				request.getHttpType(), request.getUrl(), request.getParams(),
@@ -222,13 +244,17 @@ public class EhaiVolleyFactory {
 	 * @param request
 	 *            请求对象
 	 * @param listener
-	 *            数据返回的回调监听
+	 *            数据返回的回调监听  T  EhaiJsonArrayResponse<responseClass>
 	 * @param responseClass
 	 *            返回数据的对象
 	 * */
 	public <T> void EhaiSendJsonArrayRequstDiolag(final UrlRequest request,
 			final EhaiResponseListener<T> listener, Class responseClass) {
+		if(!checkNetWork()){
+			return ;
+		}
 		logger.d(request.toString());
+		
 		EhaiGsonArrayRequest<T> ehaiGsonArrayRequest = new EhaiGsonArrayRequest<T>(
 				request.getHttpType(), request.getUrl(), request.getParams(),
 				new Listener<T>() {
@@ -302,5 +328,13 @@ public class EhaiVolleyFactory {
 				}
 			});
 		return dialog;
+	}
+	
+	private boolean  checkNetWork() {
+		if(NetUtils.NETWORK_NO==NetUtils.getNetWorkStatus(mContext)){
+			ToastUtils.showText(mContext, "请连接网络");
+			return false;
+		}
+		return true;
 	}
 }
