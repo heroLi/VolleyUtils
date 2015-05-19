@@ -29,12 +29,12 @@ import com.li.volley.utils.MyLogger;
  * 
  * @author 18834
  * @param EhaiJsonResponse
- *            <T>
+ *            <T>  
  * 
  **/
-public class EhaiGsonRequest<T> extends Request<T> {
+public class EhaiGsonRequest<T> extends Request<EhaiJsonResponse<T>> {
 
-	private Listener<T> listener;
+	private Listener<EhaiJsonResponse<T>> listener;
 
 	private String paramsString;
 
@@ -52,8 +52,8 @@ public class EhaiGsonRequest<T> extends Request<T> {
 	private final String userAgent = "Mozilla/5.0 (Linux; U; Android 2.2; en-us; Nexus One Build/FRF91) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1";
 
 	public EhaiGsonRequest(int method, String url, String param,
-			Listener<T> listener, ErrorListener errorListener,
-			Class responseClass) {
+			Listener<EhaiJsonResponse<T>> listener,
+			ErrorListener errorListener, Class responseClass) {
 		super(method, url, errorListener);
 		this.listener = listener;
 		this.paramsString = param;
@@ -61,14 +61,15 @@ public class EhaiGsonRequest<T> extends Request<T> {
 		resultClass = responseClass;
 	}
 
-	public EhaiGsonRequest(String url, Listener<T> listener,
+	public EhaiGsonRequest(String url, Listener<EhaiJsonResponse<T>> listener,
 			ErrorListener errorListener, Class responseClass) {
 		this(Method.GET, url, null, listener, errorListener, responseClass);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected Response<T> parseNetworkResponse(NetworkResponse response) {
+	protected Response<EhaiJsonResponse<T>> parseNetworkResponse(
+			NetworkResponse response) {
 		String data;
 		Gson gson = new Gson();
 		try {
@@ -76,16 +77,10 @@ public class EhaiGsonRequest<T> extends Request<T> {
 					HttpHeaderParser.parseCharset(response.headers));
 			logger.d(data == null ? "" : data);
 			Type type = GsonType(EhaiJsonResponse.class, resultClass);
-			Response<T> result = null;
-			try {
-				result = (Response<T>) Response.success(
-						gson.fromJson(data, type),
-						HttpHeaderParser.parseCacheHeaders(response));
-			} catch (Exception e) {
-				// result = (Response<T>) Response.success(
-				// gson.fromJson(data, EhaiResult.class),
-				// HttpHeaderParser.parseCacheHeaders(response));
-			}
+			Response<EhaiJsonResponse<T>> result = null;
+			result = Response.success(
+					(EhaiJsonResponse<T>) gson.fromJson(data, type),
+					HttpHeaderParser.parseCacheHeaders(response));
 			return result;
 		} catch (UnsupportedEncodingException e) {
 			return Response.error(new ParseError(e));
@@ -93,7 +88,7 @@ public class EhaiGsonRequest<T> extends Request<T> {
 	}
 
 	@Override
-	protected void deliverResponse(T response) {
+	protected void deliverResponse(EhaiJsonResponse<T> response) {
 		listener.onResponse(response);
 	}
 
@@ -114,7 +109,7 @@ public class EhaiGsonRequest<T> extends Request<T> {
 	}
 
 	/**
-	 * 设置Content-Type  当我们getbody（）时 json设置Content-Type
+	 * 设置Content-Type 当我们getbody（）时 json设置Content-Type
 	 * **/
 	@Override
 	public String getBodyContentType() {
@@ -132,14 +127,13 @@ public class EhaiGsonRequest<T> extends Request<T> {
 	}
 
 	/**
-	 * 设置请求头
-	 * 设置Content-Type 无效
+	 * 设置请求头 设置Content-Type 无效
 	 * **/
 	@Override
 	public Map<String, String> getHeaders() throws AuthFailureError {
 		Map<String, String> header = new HashMap<String, String>();
 		header.put("charset", "utf-8");
-//		header.put("Content-Type", "application/json");
+		// header.put("Content-Type", "application/json");
 		// header.put("Accept-Language", "zh-CN,zh;q=0.8");
 		// header.put("Accept-Encoding", "gzip");
 		header.put("Authorization",
@@ -148,7 +142,7 @@ public class EhaiGsonRequest<T> extends Request<T> {
 		return header;
 	}
 
-	private ParameterizedType GsonType(final Class rawClass, final Type args) {
+	private ParameterizedType GsonType(final Class rawClass, final Type... args) {
 		return new ParameterizedType() {
 
 			@Override
@@ -158,12 +152,12 @@ public class EhaiGsonRequest<T> extends Request<T> {
 
 			@Override
 			public Type getOwnerType() {
-				return args;
+				return null;
 			}
 
 			@Override
 			public Type[] getActualTypeArguments() {
-				return null;
+				return args;
 			}
 		};
 	}

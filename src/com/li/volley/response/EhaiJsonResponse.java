@@ -7,6 +7,7 @@ import java.util.List;
  * 一嗨接口返回json对象数据
  * 
  * 返回数据格式{ status: false ,message : "", data:""}
+ * 
  * @author 18834
  * 
  * **/
@@ -23,14 +24,14 @@ public class EhaiJsonResponse<T> implements Serializable {
 
 	private EhaiResult result;
 
-	private Class<T> data;
+	private T data;
 
-	public Class<T> getData() {
+	public T getData() {
 		return data;
 	}
 
-	public void setData(Class<T> data) {
-		data = data;
+	public void setData(T data) {
+		this.data = data;
 	}
 
 	public EhaiResult getResult() {

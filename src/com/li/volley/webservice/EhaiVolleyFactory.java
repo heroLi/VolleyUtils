@@ -1,7 +1,5 @@
 package com.li.volley.webservice;
 
-import java.util.Map;
-
 import android.R;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -10,7 +8,6 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnKeyListener;
 import android.view.KeyEvent;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Request.Method;
 import com.android.volley.RequestQueue;
@@ -49,6 +46,26 @@ public class EhaiVolleyFactory {
 		void onEhaiResponse(int type, T response);
 	};
 
+	/***
+	 * 接口回调接口
+	 * 
+	 * @param <T>
+	 *            为将要解析的json对象
+	 * **/
+	public interface EhaiJsonResponseListener<T> {
+		void onEhaiResponse(int type, EhaiJsonResponse<T> response);
+	}
+
+	/***
+	 * 接口回调接口
+	 * 
+	 * @param <T>
+	 *            为将要解析的json对象
+	 * **/
+	public interface EhaiJsonArrayResponseListener<T> {
+		void onEhaiResponse(int type, EhaiJsonArrayResponse<T> response);
+	}
+
 	private Dialog progressDialog;
 
 	public final static int HTTP_POST = Method.POST;
@@ -60,7 +77,7 @@ public class EhaiVolleyFactory {
 	public static String md5Key = "MD-ANDROID121953";
 
 	private String Tag = "Ehai";
-	
+
 	private Context mContext;
 
 	private MyLogger logger = MyLogger.getLogger(getClass().getSimpleName());
@@ -70,8 +87,8 @@ public class EhaiVolleyFactory {
 	public static EhaiVolleyFactory getVolleyFactory(Context context) {
 		if (ehaiVolleyFactory == null) {
 			synchronized (EhaiVolleyFactory.class) {
-				if(ehaiVolleyFactory == null){
-					
+				if (ehaiVolleyFactory == null) {
+
 					ehaiVolleyFactory = new EhaiVolleyFactory(context);
 				}
 			}
@@ -95,25 +112,25 @@ public class EhaiVolleyFactory {
 	 * @param request
 	 *            请求对象
 	 * @param listener
-	 *            数据返回的回调监听   T  EhaiJsonResponse<responseClass>
+	 *            数据返回的回调监听 T EhaiJsonResponse<responseClass>
 	 * @param responseClass
 	 *            返回数据的对象
 	 * */
 	public <T> void EhaiSendJsonRequstDiolag(Context context,
-			final UrlRequest request, final EhaiResponseListener<T> listener,
-			Class responseClass) {
-		if(!checkNetWork()){
-			return ;
+			final UrlRequest request,
+			final EhaiJsonResponseListener<T> listener, Class responseClass) {
+		if (!checkNetWork()) {
+			return;
 		}
-		
+
 		progressDialog = getDialog(context);
 		logger.d(request.toString());
 		EhaiGsonRequest<T> ehaiGsonRequest = new EhaiGsonRequest<T>(
 				request.getHttpType(), request.getUrl(), request.getParams(),
-				new Listener<T>() {
+				new Listener<EhaiJsonResponse<T>>() {
 
 					@Override
-					public void onResponse(T response) {
+					public void onResponse(EhaiJsonResponse<T> response) {
 						if (progressDialog != null) {
 							progressDialog.dismiss();
 						}
@@ -132,22 +149,22 @@ public class EhaiVolleyFactory {
 	 * @param request
 	 *            请求对象
 	 * @param listener
-	 *            数据返回的回调监听  T  EhaiJsonResponse<responseClass>
+	 *            数据返回的回调监听 T EhaiJsonResponse<responseClass>
 	 * @param responseClass
 	 *            返回数据的对象
 	 * */
 	public <T> void EhaiSendJsonRequstNo(final UrlRequest request,
-			final EhaiResponseListener<T> listener, Class responseClass) {
-		if(!checkNetWork()){
-			return ;
+			final EhaiJsonResponseListener<T> listener, Class responseClass) {
+		if (!checkNetWork()) {
+			return;
 		}
 		logger.d(request.toString());
 		EhaiGsonRequest<T> ehaiGsonRequest = new EhaiGsonRequest<T>(
 				request.getHttpType(), request.getUrl(), request.getParams(),
-				new Listener<T>() {
+				new Listener<EhaiJsonResponse<T>>() {
 
 					@Override
-					public void onResponse(T response) {
+					public void onResponse(EhaiJsonResponse<T> response) {
 						if (progressDialog != null) {
 							progressDialog.dismiss();
 						}
@@ -164,8 +181,8 @@ public class EhaiVolleyFactory {
 	public void EhaiSendStringRequstDiolag(Context context,
 			final UrlRequest request,
 			final EhaiResponseListener<String> listener) {
-		if(!checkNetWork()){
-			return ;
+		if (!checkNetWork()) {
+			return;
 		}
 		logger.d(request.toString());
 		progressDialog = getDialog(context);
@@ -186,8 +203,8 @@ public class EhaiVolleyFactory {
 
 	public void EhaiSendStringRequstNo(final UrlRequest request,
 			final EhaiResponseListener<String> listener) {
-		if(!checkNetWork()){
-			return ;
+		if (!checkNetWork()) {
+			return;
 		}
 		logger.d(request.toString());
 		EhaiStringRequest ehaiStringRequest = new EhaiStringRequest(
@@ -210,27 +227,33 @@ public class EhaiVolleyFactory {
 	 * @param request
 	 *            请求对象
 	 * @param listener
-	 *            数据返回的回调监听  T  EhaiJsonArrayResponse<responseClass>
+	 *            数据返回的回调监听 T EhaiJsonArrayResponse<responseClass>
 	 * @param responseClass
 	 *            返回数据的对象
 	 * */
 	public <T> void EhaiSendJsonArrayRequstNo(final UrlRequest request,
-			final EhaiResponseListener<T> listener, Class responseClass) {
-		if(!checkNetWork()){
-			return ;
+			final EhaiJsonArrayResponseListener<T> listener, Class responseClass) {
+		if (!checkNetWork()) {
+			return;
 		}
 		logger.d(request.toString());
 		EhaiGsonArrayRequest<T> ehaiGsonArrayRequest = new EhaiGsonArrayRequest<T>(
 				request.getHttpType(), request.getUrl(), request.getParams(),
-				new Listener<T>() {
+				new Listener<EhaiJsonArrayResponse<T>>() {
 
 					@Override
-					public void onResponse(T response) {
+					public void onResponse(EhaiJsonArrayResponse<T> response) {
 						if (progressDialog != null) {
 							progressDialog.dismiss();
 						}
-						listener.onEhaiResponse(request.getRequestType(),
-								response);
+						if (response == null) {
+							return;
+						}
+						//统一处理返回
+						if (response.getResult().isIsSuccess()) {
+							listener.onEhaiResponse(request.getRequestType(),
+									response);
+						}
 
 					}
 				}, errorListener, responseClass);
@@ -244,23 +267,23 @@ public class EhaiVolleyFactory {
 	 * @param request
 	 *            请求对象
 	 * @param listener
-	 *            数据返回的回调监听  T  EhaiJsonArrayResponse<responseClass>
+	 *            数据返回的回调监听 T EhaiJsonArrayResponse<responseClass>
 	 * @param responseClass
 	 *            返回数据的对象
 	 * */
 	public <T> void EhaiSendJsonArrayRequstDiolag(final UrlRequest request,
-			final EhaiResponseListener<T> listener, Class responseClass) {
-		if(!checkNetWork()){
-			return ;
+			final EhaiJsonArrayResponseListener<T> listener, Class responseClass) {
+		if (!checkNetWork()) {
+			return;
 		}
 		logger.d(request.toString());
-		
+
 		EhaiGsonArrayRequest<T> ehaiGsonArrayRequest = new EhaiGsonArrayRequest<T>(
 				request.getHttpType(), request.getUrl(), request.getParams(),
-				new Listener<T>() {
+				new Listener<EhaiJsonArrayResponse<T>>() {
 
 					@Override
-					public void onResponse(T response) {
+					public void onResponse(EhaiJsonArrayResponse<T> response) {
 						listener.onEhaiResponse(request.getRequestType(),
 								response);
 
@@ -329,9 +352,9 @@ public class EhaiVolleyFactory {
 			});
 		return dialog;
 	}
-	
-	private boolean  checkNetWork() {
-		if(NetUtils.NETWORK_NO==NetUtils.getNetWorkStatus(mContext)){
+
+	private boolean checkNetWork() {
+		if (NetUtils.NETWORK_NO == NetUtils.getNetWorkStatus(mContext)) {
 			ToastUtils.showText(mContext, "请连接网络");
 			return false;
 		}
