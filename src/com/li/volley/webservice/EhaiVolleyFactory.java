@@ -17,6 +17,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 import com.li.volley.response.EhaiJsonArrayResponse;
 import com.li.volley.response.EhaiJsonResponse;
+import com.li.volley.response.EhaiResult;
 import com.li.volley.response.UrlRequest;
 import com.li.volley.utils.MyLogger;
 import com.li.volley.utils.NetUtils;
@@ -64,6 +65,16 @@ public class EhaiVolleyFactory {
 	 * **/
 	public interface EhaiJsonArrayResponseListener<T> {
 		void onEhaiResponse(int type, EhaiJsonArrayResponse<T> response);
+	}
+
+	/***
+	 * 接口数据错误回调接口
+	 * 
+	 * @param <T>
+	 *            为将要解析的json对象
+	 * **/
+	public interface EhaiResponseErrorListener {
+		void onEhaiErrorResponse(int type, EhaiResult response);
 	}
 
 	private Dialog progressDialog;
@@ -116,7 +127,7 @@ public class EhaiVolleyFactory {
 	 * @param responseClass
 	 *            返回数据的对象
 	 * */
-	public <T> void EhaiSendJsonRequstDiolag(Context context,
+	public <T extends Class> void EhaiSendJsonRequstDiolag(Context context,
 			final UrlRequest request,
 			final EhaiJsonResponseListener<T> listener, Class responseClass) {
 		if (!checkNetWork()) {
@@ -137,10 +148,46 @@ public class EhaiVolleyFactory {
 						listener.onEhaiResponse(request.getRequestType(),
 								response);
 					}
-				}, errorListener, responseClass) {
+				}, errorListener) {
 		};
 		ehaiGsonRequest.setTag(Tag);
 		queue.add(ehaiGsonRequest);
+	}
+
+	public <T> void EhaiSendJsonRequstDiolag(final UrlRequest urlRequest,
+			final EhaiJsonResponseListener<T> listener,
+			final EhaiResponseErrorListener errorEhaiListener) {
+		progressDialog = getDialog(mContext);
+		EhaiGsonRequest<T> ehaiGsonRequest = new EhaiGsonRequest<T>(
+				urlRequest.getHttpType(),
+				urlRequest.getUrl() == null ? getResponseUrl(urlRequest
+						.getRequestType()) : urlRequest.getUrl(),
+				urlRequest.getParams(), new Listener<EhaiJsonResponse<T>>() {
+
+					@Override
+					public void onResponse(EhaiJsonResponse<T> response) {
+						if (progressDialog != null) {
+							progressDialog.dismiss();
+						}
+						if (response.getResult().isIsSuccess()) {
+							listener.onEhaiResponse(
+									urlRequest.getRequestType(), response);
+						} else {
+							if (errorEhaiListener != null)
+								errorEhaiListener.onEhaiErrorResponse(
+										urlRequest.getRequestType(),
+										response.getResult());
+							else {
+								// ToastUtil.makeText(response.getResult()
+								// .getMsg());
+							}
+						}
+					}
+				}, errorListener) {
+		};
+		ehaiGsonRequest.setTag(Tag);
+		queue.add(ehaiGsonRequest);
+
 	}
 
 	/**
@@ -153,7 +200,8 @@ public class EhaiVolleyFactory {
 	 * @param responseClass
 	 *            返回数据的对象
 	 * */
-	public <T> void EhaiSendJsonRequstNo(final UrlRequest request,
+	public <T extends Class> void EhaiSendJsonRequstNo(
+			final UrlRequest request,
 			final EhaiJsonResponseListener<T> listener, Class responseClass) {
 		if (!checkNetWork()) {
 			return;
@@ -171,7 +219,7 @@ public class EhaiVolleyFactory {
 						listener.onEhaiResponse(request.getRequestType(),
 								response);
 					}
-				}, errorListener, responseClass) {
+				}, errorListener) {
 		};
 		ehaiGsonRequest.setTag(Tag);
 		queue.add(ehaiGsonRequest);
@@ -249,14 +297,55 @@ public class EhaiVolleyFactory {
 						if (response == null) {
 							return;
 						}
-						//统一处理返回
+						// 统一处理返回
 						if (response.getResult().isIsSuccess()) {
 							listener.onEhaiResponse(request.getRequestType(),
 									response);
 						}
 
 					}
-				}, errorListener, responseClass);
+				}, errorListener);
+		ehaiGsonArrayRequest.setTag(Tag);
+		queue.add(ehaiGsonArrayRequest);
+	}
+
+	public <T> void EhaiSendJsonArrayRequstNo(final UrlRequest urlRequest,
+			final EhaiJsonArrayResponseListener<T> listener,
+			final EhaiResponseErrorListener errorEhaiListener) {
+
+		progressDialog = getDialog(mContext);
+		EhaiGsonArrayRequest<T> ehaiGsonArrayRequest = new EhaiGsonArrayRequest<T>(
+				urlRequest.getHttpType(),
+				urlRequest.getUrl() == null ? getResponseUrl(urlRequest
+						.getRequestType()) : urlRequest.getUrl(),
+				urlRequest.getParams(),
+				new Listener<EhaiJsonArrayResponse<T>>() {
+
+					@Override
+					public void onResponse(EhaiJsonArrayResponse<T> response) {
+						if (progressDialog != null) {
+							progressDialog.dismiss();
+						}
+						if (response == null) {
+							return;
+						}
+						if (response.getResult().isIsSuccess()) {
+							if (response.getData() != null)
+								listener.onEhaiResponse(
+										urlRequest.getRequestType(), response);
+						} else {
+							if (errorEhaiListener != null)
+								errorEhaiListener.onEhaiErrorResponse(
+										urlRequest.getRequestType(),
+										response.getResult());
+							else {
+								// ToastUtil.makeText(response.getResult()
+								// .getMsg());
+							}
+						}
+
+					}
+				}, errorListener);
 		ehaiGsonArrayRequest.setTag(Tag);
 		queue.add(ehaiGsonArrayRequest);
 	}
@@ -288,7 +377,7 @@ public class EhaiVolleyFactory {
 								response);
 
 					}
-				}, errorListener, responseClass);
+				}, errorListener);
 		ehaiGsonArrayRequest.setTag(Tag);
 		queue.add(ehaiGsonArrayRequest);
 	}
