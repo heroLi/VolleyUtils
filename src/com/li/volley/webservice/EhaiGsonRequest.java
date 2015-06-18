@@ -38,7 +38,7 @@ public class EhaiGsonRequest<T> extends Request<EhaiJsonResponse<T>> {
 
 	private String paramsString;
 
-	private T resultClass;
+	private Class resultClass;
 
 	private String url = "";
 
@@ -53,17 +53,17 @@ public class EhaiGsonRequest<T> extends Request<EhaiJsonResponse<T>> {
 
 	public EhaiGsonRequest(int method, String url, String param,
 			Listener<EhaiJsonResponse<T>> listener,
-			ErrorListener errorListener) {
+			ErrorListener errorListener, Class responseClass) {
 		super(method, url, errorListener);
 		this.listener = listener;
 		this.paramsString = param;
 		url = url;
-//		resultClass = responseClass;
+		resultClass = responseClass;
 	}
 
 	public EhaiGsonRequest(String url, Listener<EhaiJsonResponse<T>> listener,
-			ErrorListener errorListener ) {
-		this(Method.GET, url, null, listener, errorListener);
+			ErrorListener errorListener, Class responseClass) {
+		this(Method.GET, url, null, listener, errorListener, responseClass);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -76,7 +76,7 @@ public class EhaiGsonRequest<T> extends Request<EhaiJsonResponse<T>> {
 			data = new String(response.data,
 					HttpHeaderParser.parseCharset(response.headers));
 			logger.d(data == null ? "" : data);
-			Type type = GsonType(EhaiJsonResponse.class, resultClass.getClass());
+			Type type = GsonType(EhaiJsonResponse.class, resultClass);
 			Response<EhaiJsonResponse<T>> result = null;
 			result = Response.success(
 					(EhaiJsonResponse<T>) gson.fromJson(data, type),

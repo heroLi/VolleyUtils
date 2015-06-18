@@ -32,7 +32,7 @@ public class EhaiGsonArrayRequest<T> extends Request<EhaiJsonArrayResponse<T>> {
 
 	private final Listener<EhaiJsonArrayResponse<T>> mListener;
 
-	private T clazz;
+	private final Class clazz;
 
 	private final String userAgent = "Mozilla/5.0 (Linux; U; Android 2.2; en-us; Nexus One Build/FRF91) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1";
 
@@ -47,18 +47,18 @@ public class EhaiGsonArrayRequest<T> extends Request<EhaiJsonArrayResponse<T>> {
 	private static final String PROTOCOL_CONTENT_TYPE = String.format(
 			"application/json; charset=%s", PROTOCOL_CHARSET);
 
-	public EhaiGsonArrayRequest(String url,
-			Listener<EhaiJsonArrayResponse<T>> listener,
-			ErrorListener errorListener) {
-		this(Method.GET, url, null, listener, errorListener);
+	public EhaiGsonArrayRequest(String url, Listener<EhaiJsonArrayResponse<T>> listener,
+			ErrorListener errorListener, Class rep) {
+		this(Method.GET, url, null, listener, errorListener, rep);
 	}
 
 	public EhaiGsonArrayRequest(int method, String url, String par,
 			Listener<EhaiJsonArrayResponse<T>> listener,
-			ErrorListener errorListener) {
+			ErrorListener errorListener, Class rep) {
 		super(method, url, errorListener);
 		mListener = listener;
 		url = url;
+		clazz = rep;
 		parmas = par;
 	}
 
@@ -71,7 +71,7 @@ public class EhaiGsonArrayRequest<T> extends Request<EhaiJsonArrayResponse<T>> {
 			data = new String(response.data,
 					HttpHeaderParser.parseCharset(response.headers));
 
-			Type type = gsonType(EhaiJsonArrayResponse.class, clazz.getClass());
+			Type type = gsonType(EhaiJsonArrayResponse.class, clazz);
 			logger.d(data == null ? "" : data);
 			return Response.success(
 					(EhaiJsonArrayResponse<T>) gson.fromJson(data, type),

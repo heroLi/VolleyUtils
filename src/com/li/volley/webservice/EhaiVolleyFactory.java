@@ -148,7 +148,7 @@ public class EhaiVolleyFactory {
 						listener.onEhaiResponse(request.getRequestType(),
 								response);
 					}
-				}, errorListener) {
+				}, errorListener,responseClass) {
 		};
 		ehaiGsonRequest.setTag(Tag);
 		queue.add(ehaiGsonRequest);
@@ -156,7 +156,7 @@ public class EhaiVolleyFactory {
 
 	public <T> void EhaiSendJsonRequstDiolag(final UrlRequest urlRequest,
 			final EhaiJsonResponseListener<T> listener,
-			final EhaiResponseErrorListener errorEhaiListener) {
+			final EhaiResponseErrorListener errorEhaiListener,Class responseClass) {
 		progressDialog = getDialog(mContext);
 		EhaiGsonRequest<T> ehaiGsonRequest = new EhaiGsonRequest<T>(
 				urlRequest.getHttpType(),
@@ -183,7 +183,7 @@ public class EhaiVolleyFactory {
 							}
 						}
 					}
-				}, errorListener) {
+				}, errorListener,responseClass) {
 		};
 		ehaiGsonRequest.setTag(Tag);
 		queue.add(ehaiGsonRequest);
@@ -219,7 +219,7 @@ public class EhaiVolleyFactory {
 						listener.onEhaiResponse(request.getRequestType(),
 								response);
 					}
-				}, errorListener) {
+				}, errorListener,responseClass) {
 		};
 		ehaiGsonRequest.setTag(Tag);
 		queue.add(ehaiGsonRequest);
@@ -304,14 +304,14 @@ public class EhaiVolleyFactory {
 						}
 
 					}
-				}, errorListener);
+				}, errorListener,responseClass);
 		ehaiGsonArrayRequest.setTag(Tag);
 		queue.add(ehaiGsonArrayRequest);
 	}
 
 	public <T> void EhaiSendJsonArrayRequstNo(final UrlRequest urlRequest,
 			final EhaiJsonArrayResponseListener<T> listener,
-			final EhaiResponseErrorListener errorEhaiListener) {
+			final EhaiResponseErrorListener errorEhaiListener,Class responseClass) {
 
 		progressDialog = getDialog(mContext);
 		EhaiGsonArrayRequest<T> ehaiGsonArrayRequest = new EhaiGsonArrayRequest<T>(
@@ -345,7 +345,7 @@ public class EhaiVolleyFactory {
 						}
 
 					}
-				}, errorListener);
+				}, errorListener,responseClass);
 		ehaiGsonArrayRequest.setTag(Tag);
 		queue.add(ehaiGsonArrayRequest);
 	}
@@ -377,7 +377,7 @@ public class EhaiVolleyFactory {
 								response);
 
 					}
-				}, errorListener);
+				}, errorListener,responseClass);
 		ehaiGsonArrayRequest.setTag(Tag);
 		queue.add(ehaiGsonArrayRequest);
 	}
